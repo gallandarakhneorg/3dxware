@@ -1,0 +1,46 @@
+=head1 NAME
+
+g3dxapplet - Gnome2 notification applet for 3DxWare
+
+=head1 SYNOPSIS
+
+g3dxapplet
+
+=head1 DESCRIPTION
+
+3DxWare is a driver that supports the 3Dconnection's space mouses.
+The driver provided by 3Dconnection Inc. is installed as kernel-space daemon
+and should be run by the administrator due to right accesses to the USB device.
+When launched, the official 3DxWare driver open a X windows.
+
+The g3dxapplet is a Gnome2 applet which is located in the notification area of your
+Gnome desktop.
+This applet display the current state of the 3DxWare system and permits to launch or
+stop the 3DxWare driver.
+
+Each time you click on the applet, it will start or stop the 3DxWare driver.
+
+=head1 LICENSE
+
+S<GNU Public License (GPL)>
+
+Copyright (c) 2008  Stéphane GALLAND <galland@arakhne.org>
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU L<General Public License|http://www.gnu.org/copyleft/gpl.html> as published by the L<Free Software Foundation|http://www.fsf.org/>; either version 2 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; see the file S<COPYING>. If not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+=head1 MANUAL COPYRIGHT
+
+S<GNU Free Documentation License (FDL)>
+
+Copyright (c)  2008  Stéphane Galland E<lt>galland@arakhne.orgE<gt>.
+
+Permission is granted to copy, distribute and/or modify this document under the terms of the L<GNU Free Documentation License|http://www.gnu.org/licenses/fdl.txt>, Version 1.2 or any later version published by the L<Free Software Foundation|http://www.fsf.org/>; with the Invariant Sections being S<AUTOLATEX LICENSE> and S<MANUAL COPYRIGHT>, no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included in the file name S<GNU Free Documentation License.txt>.
+
+=head1 SEE ALSO
+
+L<3dxware>, L<3dxactivator>, L<3dxmanager>
+

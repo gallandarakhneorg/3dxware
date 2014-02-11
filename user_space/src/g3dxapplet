@@ -1,0 +1,268 @@
+#!/usr/bin/perl -w
+#    GNU Public License (GPL)
+#
+#    Copyright (c) 2008 Stéphane GALLAND <galland@arakhne.org>
+#
+#    This program is free software; you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the
+#    Free Software Foundation; either version 2 of the License, or (at your
+#    option) any later version.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+#    Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; see the file COPYING. If not, write to the Free
+#    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+#    02111-1307, USA.
+
+use strict;
+
+#--------------------------------------------------------------
+
+use constant VERSION => '<<VERSION_NUMBER>>';
+
+#--------------------------------------------------------------
+
+use constant TRUE => 1;
+use constant FALSE => 0;
+use constant REFRESH_RATE => 5000;
+use constant SERVER_DIRECTORY => '<<RUNNING_DIR>>';
+use constant SERVER_PID_FILE => SERVER_DIRECTORY.'/3dxsrv.pid';
+use constant MANAGER_CMD => '<<3DXMANAGER_BINARY>>';
+use constant MAIN_ICON => '<<PIXMAPS_DIR>>/g3dx.png';
+use constant WAIT_ICON => '<<PIXMAPS_DIR>>/3dx_wait.png';
+use constant RUN_ICON => '<<PIXMAPS_DIR>>/3dx_running.png';
+use constant STOP_ICON => '<<PIXMAPS_DIR>>/3dx_stopped.png';
+use constant OFF_ICON => '<<PIXMAPS_DIR>>/3dx_off.png';
+use constant MESSAGE_TIMEOUT => 3000;
+use constant RUN_MESSAGE => "the 3DxWare driver is running";
+use constant STOP_MESSAGE => "the 3DxWare driver is not running";
+use constant OFF_MESSAGE => "the 3DxWare activator is not running, please contact your administrator";
+
+#--------------------------------------------------------------
+
+use threads qw(yield);
+use Gtk2::TrayIcon;
+
+#--------------------------------------------------------------
+
+my $quitApplet = FALSE;
+my $stateBeforeWaiting = undef;
+my $appletState = OFF_ICON;
+my @bufferedMessages = ();
+
+#--------------------------------------------------------------
+
+Gtk2->init;
+
+my $trayicon = Gtk2::TrayIcon->new("3DxWare");
+my $eventbox = Gtk2::EventBox->new();
+my $button = Gtk2::Image->new();
+$eventbox->add($button);
+$trayicon->add($eventbox);
+$trayicon->show_all;
+
+#--------------------------------------------------------------
+
+sub touchPID($) {
+	my $filename = shift;
+	local *FILE;
+	open(*FILE, "> $filename") or die("$filename: $!\n");
+	print FILE "$$\n";
+	close(*FILE) or die("$filename: $!\n");
+}
+
+sub readPID($) {
+	my $filename = shift;
+	if (-r "$filename") {
+		local *FILE;
+		open(*FILE, "< $filename") or die("$filename: $!\n");
+		my $pid = <FILE>;
+		$pid =~ s/^\s+//;
+		$pid =~ s/\s+$//;
+		close(*FILE);
+		return $pid;
+	}
+	return 0;
+}
+
+sub quitApplet() {
+	$quitApplet = TRUE;
+}
+
+sub aboutApplet() {
+	my $about = Gtk2::AboutDialog->new();
+	$about->set_authors('Stephane GALLAND <galland@arakhne.org>');
+	$about->set_comments('Gnome2 applet for 3DxWare driver');
+	$about->set_copyright("3Dconnexion Inc. for the 3DxWare driver, and\nStephane GALLAND for Ubuntu extensions");
+	$about->set_license("(c) 3DConnexion Inc. for 3DxWare driver\n(c) Stephane GALLAND under GNU GPL for the Ubuntu extensions only");
+	my $logo = Gtk2::Gdk::Pixbuf->new_from_file(MAIN_ICON);
+	$about->set_logo($logo);
+	$about->set_program_name('g3dxapplet');
+	$about->set_version(VERSION);
+	$about->set_website_label('arakhne.org');
+	$about->set_website('http://www.arakhne.org/spip.php?rubrique39');
+
+    	$about->run;
+	$about->destroy; 
+}
+
+sub isRunning() {
+	return (-f SERVER_PID_FILE) ? TRUE : FALSE;
+}
+
+sub isActivatorStarted() {
+	return (-d SERVER_DIRECTORY) ? TRUE : FALSE;
+}
+
+sub updateStateIcon {
+	if ($appletState eq RUN_ICON) {
+		$button->set_from_file(RUN_ICON);
+		$button->set_tooltip_text(RUN_MESSAGE);
+	}
+	elsif ($appletState eq STOP_ICON) {
+		$button->set_from_file(STOP_ICON);
+		$button->set_tooltip_text(STOP_MESSAGE);
+	}
+	elsif ($appletState eq WAIT_ICON) {
+		$button->set_from_file(WAIT_ICON);
+	}
+	else {
+		$button->set_from_file(OFF_ICON);
+		$button->set_tooltip_text(OFF_MESSAGE);
+	}
+}
+
+sub getCurrentState() {
+	if (isActivatorStarted()) {
+		if (isRunning()) {
+			return RUN_ICON;
+		}
+		else {
+			return STOP_ICON;
+		}
+	}
+	else {
+		return OFF_ICON;
+	}
+}
+
+sub updateSignal() {
+	my $currentState = getCurrentState();
+	if ($appletState eq WAIT_ICON) {
+		if ($stateBeforeWaiting ne $currentState) {
+			$appletState = $currentState;
+			updateStateIcon();
+			if ($appletState eq OFF_ICON) {
+				push @bufferedMessages, OFF_MESSAGE;
+			}
+		}
+	}
+	elsif ($currentState ne $appletState) {
+		$appletState = $currentState;
+		updateStateIcon();
+		if ($appletState eq OFF_ICON) {
+			push @bufferedMessages, OFF_MESSAGE;
+		}
+	}
+	print STDERR "State: $appletState\n";
+	return 1;
+}
+
+sub onClick {
+	my ($widget, $event, $data) = @_;
+	# Simple click
+	if ($event && ($event->type() eq 'button-press')) {
+		if ($event->button == 1) { # left button
+			switchDaemon();
+			return TRUE;
+		}
+		elsif ($event->button == 3) { # right button
+			my $isactivated = isActivatorStarted();
+			my $isrunning = isRunning();
+			my $iswaiting = ($appletState eq WAIT_ICON);
+
+			my $menu = Gtk2::Menu->new();
+			# Start menu item
+			my $menu_start = Gtk2::ImageMenuItem->new_with_label("Start");
+			$menu_start->set_image(Gtk2::Image->new_from_stock('gtk-media-play', 'menu'));
+			$menu_start->set_sensitive($isactivated && !$iswaiting && !$isrunning);
+			$menu_start->signal_connect('activate' => \&switchDaemon);
+			$menu->add($menu_start);
+
+			# Stop menu item
+			my $menu_stop = Gtk2::ImageMenuItem->new_with_label("Stop");
+			$menu_stop->set_image(Gtk2::Image->new_from_stock('gtk-media-stop', 'menu'));
+			$menu_stop->set_sensitive($isactivated && !$iswaiting && $isrunning);
+			$menu_stop->signal_connect('activate' => \&switchDaemon);
+			$menu->add($menu_stop);
+
+			#separator
+			my $menu_sep = Gtk2::SeparatorMenuItem->new();
+			$menu->add($menu_sep);
+
+			# About menu item
+			my $menu_about = Gtk2::ImageMenuItem->new_with_label("About");
+			$menu_about->set_image(Gtk2::Image->new_from_stock('gtk-about', 'menu'));
+			$menu_about->signal_connect('activate' => \&aboutApplet);
+			$menu->add($menu_about);
+
+			#separator
+			$menu_sep = Gtk2::SeparatorMenuItem->new();
+			$menu->add($menu_sep);
+
+			# Quit menu item
+			my $menu_quit = Gtk2::ImageMenuItem->new_with_label("Quit");
+			$menu_quit->set_image(Gtk2::Image->new_from_stock('gtk-close', 'menu'));
+			$menu_quit->signal_connect('activate' => \&quitApplet);
+			$menu->add($menu_quit);
+
+			#popup menu, the three is for right mouse button
+			$menu->show_all;
+			$menu->popup(undef,undef,undef,3,3,0);
+
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+sub switchDaemon() {
+	if ($appletState eq STOP_ICON) {
+		system(MANAGER_CMD, MANAGER_CMD, '--nowait', 'start');
+		$stateBeforeWaiting = STOP_ICON;
+		$appletState = WAIT_ICON;
+		updateStateIcon();
+	}
+	elsif ($appletState eq RUN_ICON) {
+		system(MANAGER_CMD, MANAGER_CMD, '--nowait', 'stop');
+		$stateBeforeWaiting = RUN_ICON;
+		$appletState = WAIT_ICON;
+		updateStateIcon();
+	}
+}
+
+#--------------------------------------------------------------
+
+updateSignal();
+updateStateIcon();
+
+if ($appletState eq OFF_ICON) {
+	push @bufferedMessages, OFF_MESSAGE;
+}
+
+$eventbox->signal_connect('button-press-event', \&onClick);
+
+Glib::Timeout->add(REFRESH_RATE ,\&updateSignal);
+
+#Gtk2->main;
+while ((!$quitApplet) && Gtk2->main_iteration_do(FALSE)) {
+	if (@bufferedMessages) {
+		my $msg = shift @bufferedMessages;
+		$trayicon->send_message(MESSAGE_TIMEOUT, "$msg");
+	}
+	yield();
+}

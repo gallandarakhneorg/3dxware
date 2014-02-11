@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=Stop 3Dx driver
+Type=Application
+Comment=Stop 3Dx driver
+Exec=/usr/bin/3dxmanager --nowait stop
+TryExec=3dxmanager
+Icon=3dx
+Categories=Driver;System;
+Name[fr]=Arrêter le pilote 3Dx
+Comment[fr]=Arrêter le pilote 3Dx
+

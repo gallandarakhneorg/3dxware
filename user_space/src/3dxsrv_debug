@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+#    GNU Public License (GPL)
+#
+#    Copyright (c) 2008 Stéphane GALLAND <galland@arakhne.org>
+#
+#    This program is free software; you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the
+#    Free Software Foundation; either version 2 of the License, or (at your
+#    option) any later version.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+#    Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; see the file COPYING. If not, write to the Free
+#    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+#    02111-1307, USA.
+
+use strict;
+
+use constant RUN_FILE => '/tmp/3dxserver_dbg';
+
+print "Command line: ".join(' ', $0, @ARGV)."\n";
+
+for my $arg (@ARGV) {
+	if ($arg eq '-exit') {
+		print STDERR "Request stop\n";
+		unlink(RUN_FILE);
+		exit(0);
+	}
+	elsif ($arg eq '-v') {
+		print STDERR "VERSION\n";
+		exit(0);
+	}
+}
+
+local *FILE;
+open(*FILE, "> ".RUN_FILE) or die(RUN_FILE.": $!\n");
+close(*FILE);
+
+$SIG{INT} = \&killSignal;
+
+while ( -e RUN_FILE ) {
+	# Do nothing
+}
+
+print STDERR "Normal stop\n";
+
+exit(0);
+
+sub killSignal {
+	print STDERR "Killing debugging 3DxWare server\n";
+	unlink(RUN_FILE);
+	exit(1);
+}

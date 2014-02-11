@@ -1,0 +1,10 @@
+all:
+
+clean:
+	${RM} `find -name "*~" -o -name "*.bak"`
+
+install:
+	install -d "${PREFIX}/include/3dxware/MSwin"
+	install ./3dxware/*.h "${PREFIX}/include/3dxware"
+	install ./3dxware/MSwin/*.h "${PREFIX}/include/3dxware/MSwin"
+

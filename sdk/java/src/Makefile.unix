@@ -1,0 +1,121 @@
+BASEPREFIX = /usr
+PREFIX = ${BASEPREFIX}
+DEBUG = 0
+PLATFORM = LINUX
+
+VERSION = ${shell cat ../VERSION}
+
+dirname = $(patsubst %/,%, $(dir $1))
+toclass = $(subst /,.,$(patsubst ./%,%,$(basename $1)))
+
+JAVA_OUTPUT_DIR = ./build
+CLASSPATH = ${JAVA_OUTPUT_DIR}:${JAVA_SRC_ROOT}:
+#JAVA_SRC_ROOT = /home/sgalland/Documents/workspace/3dxware
+JAVA_SRC_ROOT = .
+JAVAH = $(realpath /etc/alternatives/javah)
+JAVAC = $(realpath /etc/alternatives/javac)
+JAR = $(realpath /etc/alternatives/jar)
+JAVA_ROOT_DIR = $(call dirname, $(call dirname, ${JAVAH}))
+JNI_INCLUDE_PATHS = $(shell find ${JAVA_ROOT_DIR}/include -type d -printf '%p:')
+S_JAVA_SRC_FILES = $(shell cd "${JAVA_SRC_ROOT}"; find . -name "*.java")
+JAVA_SRC_FILES = $(shell find "${JAVA_SRC_ROOT}" -name "*.java")
+S_JAVA_RESOURCE_FILES = $(shell cd "${JAVA_SRC_ROOT}"; find . -name "*.properties" -o -name "*.png" -o -name "*.jpg")
+JAVA_RESOURCE_FILES = $(shell find "${JAVA_SRC_ROOT}" -name "*.properties" -o -name "*.png" -o -name "*.jpg")
+PACKAGABLE_FILES = ../VERSION ../AUTHORS ../COPYING ../README
+
+DXWARE_INCLUDE_PATH = ../../cpp/include
+DXWARE_LIB_PATH = ../../cpp/src
+
+OBJS =  JNIDriver.o JNIXlibBinder.o
+
+LIBS := -lX11 -lm -l3dxware -L${DXWARE_LIB_PATH} -L. -ljawt -L${JAVA_ROOT_DIR}/jre/lib/i386
+FLAGS := -I${DXWARE_INCLUDE_PATH} $(patsubst %,-I%,$(subst :, ,$(JNI_INCLUDE_PATHS))) "-DMAGELLAN_VERSION=${VERSION}" -DX11 -D${PLATFORM} -Wall -Werror
+
+ifeq ("${DEBUG}","1")
+override FLAGS += -DDEBUG
+endif
+
+override CFLAGS += ${FLAGS}
+override CXXFLAGS += ${FLAGS}
+
+all: jar jni exec
+
+jni: lib3dxware-jni.so
+
+jar: 3dxware.jar
+
+exec: j3dxtest.sh j3dxdbg.sh 3dxdbg.sh
+
+j3dxtest.sh:
+	@echo "#!/bin/sh" > j3dxtest.sh
+	@echo "export LD_LIBRARY_PATH=\"$$LD_LIBRARY_PATH:${BASEPREFIX}/lib/jni\"" >> j3dxtest.sh
+	@echo "exec java -cp \"${BASEPREFIX}/share/java/3dxware.jar:\" org.arakhne.dxware.test.SpaceMouseTest" >> j3dxtest.sh
+	@chmod +x j3dxtest.sh
+
+j3dxdbg.sh:
+	@echo "#!/bin/sh" > j3dxdbg.sh
+	@echo "export LD_LIBRARY_PATH=\"$$LD_LIBRARY_PATH:.:${DXWARE_LIB_PATH}\"" >> j3dxdbg.sh
+	@echo "exec java -cp \"./3dxware.jar:\" org.arakhne.dxware.test.SpaceMouseTest" >> j3dxdbg.sh
+	@chmod +x j3dxdbg.sh
+
+3dxdbg.sh:
+	@echo "#!/bin/sh" > 3dxdbg.sh
+	@echo "export LD_LIBRARY_PATH=\"$$LD_LIBRARY_PATH:.:${DXWARE_LIB_PATH}\"" >> 3dxdbg.sh
+	@echo "exec ../../cpp/src/3dxtest" >> 3dxdbg.sh
+	@chmod +x 3dxdbg.sh
+
+3dxware.jar: ${JAVA_SRC_FILES} ${B_JAVA_RESOURCE_FILES} ${PACKAGABLE_FILES}
+	@mkdir -p "${JAVA_OUTPUT_DIR}"
+	@for FILE in ${PACKAGABLE_FILES}; \
+	do \
+		cp -vf $$FILE "${JAVA_OUTPUT_DIR}/"; \
+	done; \
+	for FILE in ${S_JAVA_RESOURCE_FILES}; \
+	do \
+		mkdir -p "${JAVA_OUTPUT_DIR}/`dirname $$FILE`"; \
+		cp -vf "${JAVA_SRC_ROOT}/$$FILE" "${JAVA_OUTPUT_DIR}/$$FILE"; \
+	done; \
+	${JAVAC} -d "${JAVA_OUTPUT_DIR}" -classpath "${CLASSPATH}" ${JAVA_SRC_FILES}; \
+	cd "${JAVA_OUTPUT_DIR}"; ${JAR} cvf ../$@ .
+
+lib3dxware-jni.so: ${OBJS}
+	${CXX} ${CXXFLAGS} ${LIBS} -shared -o $@ $^
+
+JNIDriver.h: ${JAVA_SRC_ROOT}/org/arakhne/dxware/Driver.java
+	@${JAVAH} -classpath "${CLASSPATH}" -o ./JNIDriver.h org.arakhne.dxware.Driver
+
+JNIDriver.o: JNIDriver.cpp JNIDriver.h
+	${CXX} ${CXXFLAGS} -o $@ -c $<
+
+JNIXlibBinder.o: JNIXlibBinder.cpp JNIBinder.h
+	${CXX} ${CXXFLAGS} -o $@ -c $<
+
+clean:
+	${RM} *.o *~ *.bak *.log *.so *.jar
+	${RM} -r "${JAVA_OUTPUT_DIR}"
+	${RM} JNIDriver.h j3dxtest.sh j3dxdbg.sh 3dxdbg.sh
+	${RM} `find -name "*.class"`
+
+install:
+	install -d "${PREFIX}/lib/jni"
+	install ./lib3dxware-jni.so "${PREFIX}/lib/jni/lib3dxware-jni.so.${VERSION}"
+	ln -fs "./lib3dxware-jni.so.${VERSION}" "${PREFIX}/lib/jni/lib3dxware-jni.so"
+	install -d "${PREFIX}/share/java"
+	install ./3dxware.jar "${PREFIX}/share/java/3dxware-${VERSION}.jar"
+	ln -fs "./3dxware-${VERSION}.jar" "${PREFIX}/share/java/3dxware.jar"
+	install -d "${PREFIX}/bin"
+	install -m 0755 ./j3dxtest.sh "${PREFIX}/bin/j3dxtest"
+
+info:
+	@echo "Version: ${VERSION}"
+	@echo "Libs: ${LIBS}"
+	@echo "Flags: ${FLAGS}"
+	@echo "Java source root: ${JAVA_SRC_ROOT}"
+	@echo "javac: ${JAVAC}"
+	@echo "jar: ${JAR}"
+	@echo "javah: ${JAVAH}"
+	@echo "Java root directory: ${JAVA_ROOT_DIR}"
+	@echo "JNI include paths: ${JNI_INCLUDE_PATHS}"
+	@echo "Java source files: ${JAVA_SRC_FILES}"
+	@echo "Java resource files: ${JAVA_RESOURCE_FILES}"
+

@@ -1,0 +1,30 @@
+--------------------------------
+-- HOW TO COMPILE AND INSTALL --
+--------------------------------
+
+1) ON LINUX
+-----------
+
+Unpack and install the content of the official driver zip archive (3DxSoftware_v3-6-11.exe or 3dxware-linux-v1-3-0.i386.tar.gz).
+
+Then type the following command to compile and install the additional tools.
+
+$> make -C ./sdk -f Makefile.linux PLATFORM=LINUX PREFIX=/usr all
+
+$> make -C ./sdk -f Makefile.linux PLATFORM=LINUX PREFIX=/usr install
+
+$> perl ./user_space/Makefile.PL 
+	--pixmaps /usr/share/pixmaps
+	--bin /usr/bin
+	--sbin /usr/sbin
+	--desktop /usr/share/applications
+	--etc /etc
+	--varrun /var/run
+	--man=/usr/share/man install
+
+$> make -C ./sdk -f Makefile.linux PLATFORM=LINUX PREFIX=/usr clean
+
+
+Have fun.
+
+Stephane

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=Applet 3Dx
+Type=Application
+Comment=Start 3Dx Gnome2 Applet
+Exec=/usr/bin/g3dxapplet&
+TryExec=g3dxapplet
+Icon=g3dx
+Categories=Driver;System;
+Name[fr]=Applet 3Dx
+Comment[fr]=Démarrer l'applet Gnome2 3Dx

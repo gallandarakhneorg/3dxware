@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=Start 3Dx driver
+Type=Application
+Comment=Start 3Dx driver
+Exec=/usr/bin/3dxmanager --nowait start
+TryExec=3dxmanager
+Icon=3dx
+Categories=Driver;System;
+Name[fr]=Démarrer le pilote 3Dx
+Comment[fr]=Démarrer le pilote 3Dx
+

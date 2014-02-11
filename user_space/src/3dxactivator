@@ -1,0 +1,218 @@
+#!/usr/bin/perl -w
+#    GNU Public License (GPL)
+#
+#    Copyright (c) 2008 Stéphane GALLAND <galland@arakhne.org>
+#
+#    This program is free software; you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the
+#    Free Software Foundation; either version 2 of the License, or (at your
+#    option) any later version.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+#    Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; see the file COPYING. If not, write to the Free
+#    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+#    02111-1307, USA.
+
+use strict;
+
+use constant VERSION => '<<VERSION_NUMBER>>';
+
+use Getopt::Long;
+use POSIX qw( mkfifo :sys_wait_h );
+use Sys::Syslog qw(:standard :macros);
+
+use constant RUN_DIR => '<<RUNNING_DIR>>';
+use constant SERVER_CMD => '<<3DXSRV_BINARY>>';
+
+use constant TRUE => 1;
+use constant FALSE => 0;
+use constant ACTION_FILE => RUN_DIR.'/actions';
+use constant PID_FILE => RUN_DIR.'/3dxsrv.pid';
+use constant CMD_QUIT => 'quit';
+use constant CMD_START => 'start';
+use constant CMD_STOP => 'stop';
+
+my $action;
+my $stop = FALSE;
+my $exit = undef;
+my $forceStart = FALSE;
+my $device = 'usb';
+my $wakeupDelay = 1;
+my $verbose = 1;
+
+my $serverPID = undef;
+
+sub dolog(@) {
+	if ($verbose>0) {
+		openlog('3DxWare activator', 'ndelay,nofatal,nowait', LOG_DAEMON);
+		for my $m (@_) {
+			syslog(LOG_INFO, "$m");
+		}
+		closelog();
+	}
+	if ($verbose>1) {
+		print STDERR @_;
+	}
+}
+
+sub error($@) {
+	openlog('3DxWare activator', 'ndelay,nofatal,nowait', LOG_DAEMON);
+	for my $m (@_) {
+		syslog(LOG_ERR, "$m");
+	}
+	closelog();
+
+	dolog("Shutting down 3DxWare activator\n");
+	unlink(PID_FILE);
+	unlink(ACTION_FILE);
+	rmdir(RUN_DIR);
+
+	if ($verbose>1) {
+		die(join('',@_));
+	}
+	else {
+		exit(3);	
+	}
+}
+
+sub errornoclean($@) {
+	openlog('3DxWare activator', 'ndelay,nofatal,nowait', LOG_DAEMON);
+	for my $m (@_) {
+		syslog(LOG_ERR, "$m");
+	}
+	closelog();
+
+	if ($verbose>1) {
+		die(join("\n",@_));
+	}
+	else {
+		exit(3);	
+	}
+}
+
+sub initRunDirectory() {
+	# Create the running directory
+	if (! -d RUN_DIR) {
+		mkdir(RUN_DIR) or error(RUN_DIR.": mkdir: $!\n");
+	}
+	# Create the action file
+	if (! -p ACTION_FILE) {
+		unlink(ACTION_FILE);
+		mkfifo(ACTION_FILE, 0622) or error(ACTION_FILE.": mkfifo: $!\n");
+	}
+	# Change the rights
+	chmod 0622, ACTION_FILE or error(ACTION_FILE.": chmod: $!\n");
+}
+
+sub backgroundRun($@) {
+	my $cmd = shift;
+	my $pid = fork();
+	error("unable to fork\n") unless (defined($pid));
+	if (!$pid) {
+		# in child
+		exec("$cmd", @_) or error("unable to launch sub-process for $cmd\n");
+	}
+	return $pid;
+}
+
+sub signalTriggered {
+	dolog("Send QUIT action to the activator\n");
+	$stop = TRUE;
+	return 0;
+}
+
+sub waitZombies() {
+	dolog("Waiting for child processes\n");
+	my $kid;
+	do {
+		$kid = waitpid(-1, WNOHANG);
+        }
+	while ($kid>=0);
+}
+
+# Check for daemon presence
+if (! -x SERVER_CMD) {
+	errornoclean("3DxWare server not found: ".SERVER_CMD."\n");
+}
+
+if (!GetOptions('d=s' => \$device,
+		'wakeup=n' => \$wakeupDelay,
+		'quiet' => sub { $verbose = 0; },
+		'v+' => sub { $verbose++; },
+	)) {
+	exit(1);
+}
+
+if (-d RUN_DIR) {
+	errornoclean(RUN_DIR." is already existing\n");
+}
+
+initRunDirectory();
+
+$SIG{INT} = \&signalTriggered;
+
+local *ACTION_HDL;
+
+while(!$stop) {
+	if (open(*ACTION_HDL, "< ".ACTION_FILE)) {
+		$action = <ACTION_HDL> || '';
+		close(*ACTION_HDL);
+		if ($action) {
+			$action =~ s/^\s+//;
+			$action =~ s/\s+$//;
+		}
+
+		if ($action eq CMD_QUIT) {
+			$stop = TRUE;
+		}
+		elsif ($serverPID) {
+			if ($action eq CMD_STOP) {
+				dolog("Stopping 3Dxware server\n");
+				system(SERVER_CMD, '-exit');
+				unlink(PID_FILE);
+				waitZombies();
+				$serverPID = undef;
+			}
+			elsif ($action) {
+				dolog("Ignoring action '$action'\n");
+			}
+		}
+		else {
+			if ($action eq CMD_START) {
+				dolog("Starting 3Dxware server\n");
+				my $pid = backgroundRun(SERVER_CMD,'-d',"$device");
+				if ($pid) {
+					local *SRVPIDFILE;
+					open(*SRVPIDFILE,"> ".PID_FILE) or die(PID_FILE.":$ $!\n");
+					print SRVPIDFILE "$pid\n";
+					close(*SRVPIDFILE);
+					$serverPID = $pid;
+					dolog("\tstarted with PID $serverPID\n");
+				}
+			}
+			elsif ($action) {
+				dolog("Ignoring action '$action'\n");
+			}
+		}
+		sleep("$wakeupDelay");
+	}
+}
+
+if ($serverPID) {
+	dolog("Shutting down 3DxWare server\n");
+	system(SERVER_CMD, '-exit');
+}
+
+waitZombies();
+
+dolog("Shutting down 3DxWare activator\n");
+unlink(PID_FILE);
+unlink(ACTION_FILE);
+rmdir(RUN_DIR);
+
+exit(0);
