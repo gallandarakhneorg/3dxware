@@ -1,4 +1,24 @@
 --------------------------------
+-- Arakhne Space Mouse Driver --
+--------------------------------
+
+This software is named "Arakhne Space Mouse Driver" (aka. ASMD).
+
+ASMD is a Java and C++-based library which provides a basic and common way to use
+a space mouse on all the supported operating systems (Linux, Windows...).
+
+ASMD is using the official 3Dconnexion driver for the space mouses.
+
+The tools distributed on side of the 3DxWare driver (from 3Dconnexion, Logitech Inc.)
+are written by Stephane GALLAND (galland@arakhne.org) under the terms of the GNU Lesser General Public
+License (see COPYING file for original text of the GPL license and COPYING.LESSER file for the Lesser extension).
+
+The 3DxWare driver is the property of 3Dconnection, all rights reserved.
+
+The version number is defined by the pattern: <3Dconnexion_driver_version>.<arakhne_driver_version>
+The 3Dconnexion driver version is composed of three digits.
+
+--------------------------------
 -- HOW TO COMPILE AND INSTALL --
 --------------------------------
 
@@ -25,6 +45,34 @@ $> perl ./user_space/Makefile.PL
 $> make -C ./sdk -f Makefile.linux PLATFORM=LINUX PREFIX=/usr clean
 
 
-Have fun.
+-------------
+-- LICENSE --
+-------------
 
-Stephane
+The debian-specific tools distributed with the 3DxWare driver (from 3Dconnexion, Logitech Inc.)
+are written by Stephane GALLAND (galland@arakhne.org) under the terms of the GNU General Public
+License (see COPYING for more details).
+
+The 3DxWare driver is the property of 3Dconnection, all rights reserved.
+
+DEBIAN TOOL LICENSE
+-------------------
+
+    GNU Public License (GPL)
+
+    Copyright (c) 2008 Stéphane GALLAND <galland@arakhne.org>
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; see the file COPYING. If not, write to the Free
+    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+    02111-1307, USA.
