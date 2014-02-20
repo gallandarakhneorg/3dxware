@@ -23,6 +23,10 @@
 #define _QUOTEME(x)		#x
 #define QUOTEME(x)		_QUOTEME(x)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 namespace dxware {
 
 Driver::Driver(): isDriverLaunched(false), allowKeyEventFlag(false), isBlockingState(true)
@@ -73,3 +77,8 @@ const char* Driver::getAPIVersion() const
 }
 
 } /* namespace dxware */
+
+#ifdef __cplusplus
+}
+#endif
+

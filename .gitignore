@@ -1,2 +1,10 @@
 3DxSoftware*.exe
 3dxware-linux*.tar.gz
+
+sdk/cpp/src/*.o
+sdk/cpp/src/*.obj
+sdk/cpp/src/*.so
+sdk/cpp/src/*.dll
+sdk/cpp/src/Xwin/*.o
+sdk/cpp/src/MSwin/*.obj
+

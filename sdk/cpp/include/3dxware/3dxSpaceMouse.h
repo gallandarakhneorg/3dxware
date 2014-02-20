@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -21,6 +21,10 @@
 
 #  include <3dxware/3dxEvent.h>
 #  include <3dxware/3dxDriver.h>
+
+#  ifdef __cplusplus
+extern "C" {
+#  endif
 
 namespace dxware {
 
@@ -120,6 +124,10 @@ class SpaceMouse {
 };
 
 } /* namespace dxware */
+
+#  ifdef __cplusplus
+}
+#  endif
 
 #endif // __3DX_SPACE_MOUSE_H__
 

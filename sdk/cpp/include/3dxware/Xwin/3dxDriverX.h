@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2013 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -52,6 +52,10 @@
 /** Index of the Xlib XWMHints resource
  */
 #  define XDRIVER_RESOURCE_CLASSHINTS 4
+
+#  ifdef __cplusplus
+extern "C" {
+#  endif
 
 namespace dxware {
 
@@ -309,6 +313,10 @@ class XWindowDriver: public Driver {
 };
 
 } /* namespace dxware */
+
+#  ifdef __cplusplus
+}
+#  endif
 
 #endif // __3DX_DRIVER_X_H__
 

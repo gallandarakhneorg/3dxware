@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -20,8 +20,10 @@
 #  define __3DX_CMD_LINE_H__
 
 #  ifdef __cplusplus
-namespace dxware {
+extern "C" {
 #  endif
+
+namespace dxware {
 
 /** Returns the number of parameters on the command line.
  *
@@ -59,6 +61,8 @@ const char* getCommandLineProgram();
  * \author St&eacute;phane GALLAND &lt;galland@arakhne.org&gt;
  */
 void saveCommandLine(unsigned int argc, char** argv);
+
+} /* namespace dxware */
 
 #  ifdef __cplusplus
 }

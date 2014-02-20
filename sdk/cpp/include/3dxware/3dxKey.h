@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -20,8 +20,10 @@
 #  define __3DX_KEY_H__
 
 #  ifdef __cplusplus
-namespace dxware {
+extern "C" {
 #  endif
+
+namespace dxware {
 
 /** List of supported keys by the 3DxWare C++ driver.
  *
@@ -285,8 +287,10 @@ inline bool isLockModifierKey(ModifierKeyField modifiers)
 	return (modifiers & (KEY_CAPS_LOCK|KEY_SHIFT_LOCK)) != 0;
 }
 
+} /*namespace dxware */
+
 #  ifdef __cplusplus
-} // namespace dxware
+}
 #  endif
 
 #  ifdef X11

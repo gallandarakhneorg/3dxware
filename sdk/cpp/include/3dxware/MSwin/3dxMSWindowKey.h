@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -24,8 +24,10 @@
 #  include <3dxware/3dxKey.h>
 
 #  ifdef __cplusplus
-namespace dxware {
+extern "C" {
 #  endif
+
+namespace dxware {
 
 /**
  * Key manager used on Microsoft operating sytems.
@@ -114,6 +116,8 @@ class MSWindowKeyManager
 		ModifierKeyField modifiers;
 
 };
+
+} /* namespace dxware */
 
 #  ifdef __cplusplus
 }

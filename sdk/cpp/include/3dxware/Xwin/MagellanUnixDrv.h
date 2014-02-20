@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2010 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -39,6 +39,10 @@
 #define MagellanInputButtonPressEvent ((int)dxware::MAGELLAN_INPUT_BUTTON_PRESS_EVENT)
 #define MagellanInputButtonReleaseEvent ((int)dxware::MAGELLAN_INPUT_BUTTON_RELEASE_EVENT)
 
+#  ifdef __cplusplus
+extern "C" {
+#  endif
+
 union _MagellanInputEventUnion_
 {
 	int data[7];
@@ -75,7 +79,8 @@ struct _MagellanFloatEvent_
 };
 typedef struct _MagellanFloatEvent_ MagellanFloatEvent;
 
-union _MagellanTypeConversion_
+
+union _MagellanTypeConversion_
 {
 	float Float;
 	short Short[ 2 ];
@@ -87,7 +92,8 @@ enum _CommandMessages_
 	NoCommandMessage = 0,
   	CommandMessageApplicationWindow = dxware::MAGELLAN_COMMAND_APPLICATION_WINDOW, 
 	CommandMessageApplicationSensitivity = dxware::MAGELLAN_COMMAND_SENSITIVITY
-};
+};
+
 extern Atom MagellanMotionEvent;
 extern Atom MagellanButtonPressEvent;
 extern Atom MagellanReleaseEvent;
@@ -161,5 +167,9 @@ Bool MagellanCheckMotionEvent(Display* display, XEvent* event, char* arg);
 int MagellanErrorHandler(Display* display, XErrorEvent* error);
 
 int MagellanRemoveMotionEvents(Display* display);
-
+
+#  ifdef __cplusplus
+}
+#  endif
+
 #endif  /* __MAGELLAN_UNIX_DRV_H__ */

@@ -248,7 +248,7 @@ void bind(JNIEnv* env, jobject jcomponent, dxware::Driver* driver, const char* n
 #endif
 }
 
-};
+}
 
 #endif
 

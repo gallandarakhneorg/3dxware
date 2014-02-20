@@ -1,0 +1,61 @@
+export BASEPREFIX = /usr
+export PREFIX = ${BASEPREFIX}
+export DEBUG=0
+export PLATFORM = LINUX
+export SHELL := /bin/bash
+export VERSION := ${shell cat ../../../VERSION}
+
+INCLUDE_DIR = ../include
+DXWARE_INCLUDE_DIR = ${INCLUDE_DIR}/3dxware
+
+OBJS =  3dxCmdLine.o 3dxEvent.o 3dxDriver.o 3dxSpaceMouse.o Xwin/3dxDriverX.o Xwin/3dxXWindowKey.o Xwin/MagellanUnixDrv.o
+BINS = lib3dxware.so 3dxtest Xwin/x3dxtest
+
+LIBS := -lX11 -lm
+FLAGS := "-I${INCLUDE_DIR}" "-DMAGELLAN_VERSION=${VERSION}" -DX11 -D${PLATFORM} -DPLATFORM=${PLATFORM} -Wall -Werror -ansi -pedantic -fPIC
+
+ifeq ("${DEBUG}","1")
+override FLAGS += -DDEBUG
+endif
+
+override CFLAGS += ${FLAGS}
+override CXXFLAGS += ${FLAGS}
+
+all: ${BINS}
+
+lib3dxware.so: ${OBJS}
+	${CXX} ${CXXFLAGS} -shared -o $@ $^ ${LIBS}
+
+3dxtest: 3dxtest.o lib3dxware.so
+	${CXX} ${CXXFLAGS} -o $@ $< -L. ${LIBS} -l3dxware
+
+Xwin/x3dxtest: Xwin/x3dxtest.o lib3dxware.so
+	${CXX} ${CXXFLAGS} -o $@ $^ -L. ${LIBS} -l3dxware
+
+%.o: %.cpp
+	${CXX} ${CXXFLAGS} -c -o $@ $<
+
+clean:
+	${RM} `find -name "*.o" -o -name "*~" -o -name "*.bak"`
+	${RM} `find ${INCLUDE_DIR} -name "*~" -o -name "*.bak"`
+	${RM} ${BINS}
+
+install:
+	install -d "${PREFIX}/include/3dxware/Xwin"
+	install "${INCLUDE_DIR}/xdrvlib.h" "${PREFIX}/include"
+	install "${INCLUDE_DIR}/3dxware/*.h" "${PREFIX}/include/3dxware"
+	install "${INCLUDE_DIR}/3dxware/Xwin/*.h" "${PREFIX}/include/3dxware/XWin"	
+	install -d "${PREFIX}/lib"
+	install lib3dxware.so "${PREFIX}/lib/lib3dxware.so.${VERSION}"
+	ln -fs "./lib3dxware.so.${VERSION}" "${PREFIX}/lib/lib3dxware.so"
+	install -d "${PREFIX}/bin"
+	install 3dxtest "${PREFIX}/bin/3dxtest"
+	install Xwin/x3dxtest "${PREFIX}/bin/x3dxtest"
+
+info:
+	@echo "Version: ${VERSION}"
+	@echo "Libs: ${LIBS}"
+	@echo "Flags: ${FLAGS}"
+	@echo "Platform: ${PLATFORM}"
+	@echo "Debug Flag: ${DEBUG}"
+

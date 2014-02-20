@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -22,6 +22,10 @@
 
 #include <3dxware/3dxSpaceMouse.h>
 #include <3dxware/3dxException.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 namespace dxware {
 
@@ -218,4 +222,8 @@ void SpaceMouse::fireButton3DReleased(const DeviceEvent* event) const
 }
 
 } /* namespace dxware */
+
+#ifdef __cplusplus
+}
+#endif
 

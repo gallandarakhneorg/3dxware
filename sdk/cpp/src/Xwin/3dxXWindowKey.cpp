@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -21,6 +21,10 @@
 
 #include <3dxware/Xwin/3dxXWindowKey.h>
 #include <3dxware/3dxKey.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 namespace dxware {
 
@@ -395,4 +399,9 @@ bool XWindowKeyManager::hasNewKey() const
 	return hasNewKeyValue;
 }
 
-} // namespace dxware
+} /* namespace dxware */
+
+#ifdef __cplusplus
+}
+#endif
+

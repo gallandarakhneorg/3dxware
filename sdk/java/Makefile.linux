@@ -1,4 +1,4 @@
-SUBDIRS := ./cpp ./java
+SUBDIRS := ./src
 
 runmake = ${MAKE} --no-print-directory -C "$1" -f Makefile.linux "$2"
 runmakes = true $(foreach SUB,${SUBDIRS}, && $(call runmake,${SUB},$1))

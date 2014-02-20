@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -20,6 +20,10 @@
 #  define __3DX_EVENT_H__
 
 #  include <3dxware/3dxKey.h>
+
+#  ifdef __cplusplus
+extern "C" {
+#  endif
 
 namespace dxware {
 
@@ -139,7 +143,11 @@ class DeviceListener {
 		virtual void onKeyReleased(const DeviceEvent& event) = 0;
 };
 
+} /* namespace dxware */
+
+#  ifdef __cplusplus
 }
+#  endif
 
 #endif // __3DX_EVENT_H__
 

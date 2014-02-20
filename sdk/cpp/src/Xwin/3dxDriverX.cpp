@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2009,2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -49,6 +49,10 @@
 
 #define MAGELLAN_INIT_TRIES	5
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 namespace dxware {
 
 static char* WINNAME = (char*)("Magellan 3D Controller");
@@ -91,7 +95,7 @@ Window XWindowDriver::createXWindowContext()
 {
 	Window window;
 	Window root;
-	int screenNumber, width, height;
+	int screenNumber/*, width, height*/;
 	XTextProperty windowName;
 
 	// Open a Window
@@ -108,8 +112,8 @@ Window XWindowDriver::createXWindowContext()
 	}
 
 	screenNumber = DefaultScreen(display);
-	width  = DisplayWidth(display,screenNumber);
-	height = DisplayHeight(display,screenNumber);
+	/*width  = DisplayWidth(display,screenNumber);*/
+	/*height = DisplayHeight(display,screenNumber);*/
 	root   = DefaultRootWindow(display);
 	window = XCreateSimpleWindow( display, root,
 			0,0, /*position*/
@@ -581,4 +585,8 @@ bool XWindowDriver::sendMagellanCommand(Display* display, MagellanCommandType co
 }
 
 } /* namespace dxware */
+
+#ifdef __cplusplus
+}
+#endif
 

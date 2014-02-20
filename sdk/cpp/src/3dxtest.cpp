@@ -23,6 +23,10 @@
 #include <3dxware/3dxCmdLine.h>
 #include <3dxware/3dxException.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int main(int argc, char** argv)
 {
 	try {
@@ -85,3 +89,8 @@ int main(int argc, char** argv)
 		e.printf();
 	}
 }
+
+#ifdef __cplusplus
+}
+#endif
+

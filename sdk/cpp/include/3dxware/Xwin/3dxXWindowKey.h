@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -26,8 +26,10 @@
 #  include <3dxware/3dxKey.h>
 
 #  ifdef __cplusplus
-namespace dxware {
+extern "C" {
 #  endif
+
+namespace dxware {
 
 /**
  * Key manager used on Xlib operating sytems.
@@ -106,6 +108,8 @@ class XWindowKeyManager
 		ModifierKeyField modifiers;
 		bool hasNewKeyValue;
 };
+
+} /* namespoace dxware */
 
 #  ifdef __cplusplus
 }

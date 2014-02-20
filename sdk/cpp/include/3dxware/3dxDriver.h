@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -19,7 +19,11 @@
 #ifndef __3DX_DRIVER_H__
 #  define __3DX_DRIVER_H__
 
-#include <3dxware/3dxEvent.h>
+#  include <3dxware/3dxEvent.h>
+
+#  ifdef __cplusplus
+extern "C" {
+#  endif
 
 namespace dxware {
 
@@ -191,13 +195,17 @@ class Driver {
 
 } /* namespace dxware */
 
-#ifdef X11
-#  include <3dxware/Xwin/3dxDriverX.h>
-#elif defined(WIN32) || defined(WIN64)
-#  include <3dxware/MSwin/3dxDriverMS.h>
-#else
-#  error Operating system not supported.
-#endif
+#  ifdef __cplusplus
+}
+#  endif
+
+#  ifdef X11
+#    include <3dxware/Xwin/3dxDriverX.h>
+#  elif defined(WIN32) || defined(WIN64)
+#    include <3dxware/MSwin/3dxDriverMS.h>
+#  else
+#    error Operating system not supported.
+#  endif
 
 #endif // __3DX_DRIVER_H__
 

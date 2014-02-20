@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -23,6 +23,10 @@
 #include <3dxware/3dxCmdLine.h>
 
 #define __STRINGIFY(__v__) #__v__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 namespace dxware {
 
@@ -86,4 +90,8 @@ const DeviceEvent* MSWindowDriver::nextEvent()
 }
 
 } /* namespace dxware */
+
+#ifdef __cplusplus
+}
+#endif
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -21,6 +21,10 @@
 
 #include <3dxware/MSwin/3dxMSWindowKey.h>
 #include <3dxware/3dxKey.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 namespace dxware {
 
@@ -396,4 +400,9 @@ bool MSWindowKeyManager::isVoid() const
 	return lastKey==KEY_VOID;
 }
 
-} // namespace dxware
+} /* namespace dxware */
+
+#ifdef __cplusplus
+}
+#endif
+

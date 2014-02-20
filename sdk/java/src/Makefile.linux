@@ -1,38 +1,53 @@
-BASEPREFIX = /usr
-PREFIX = ${BASEPREFIX}
-DEBUG = 0
-PLATFORM = LINUX
-
-VERSION = ${shell cat ../VERSION}
+export BASEPREFIX = /usr
+export PREFIX = ${BASEPREFIX}
+export DEBUG=0
+export PLATFORM = LINUX
+export SHELL := /bin/bash
+export VERSION := ${shell cat ../../../VERSION}
+export ARCH := $(shell getconf LONG_BIT)
 
 dirname = $(patsubst %/,%, $(dir $1))
 toclass = $(subst /,.,$(patsubst ./%,%,$(basename $1)))
 
+ifeq ("${JAVA_HOME}","")
+	JAVAH = $(realpath /usr/bin/javah)
+	JAVAC = $(realpath /usr/bin/javac)
+	JAR = $(realpath /usr/bin/jar)
+	JAVA_ROOT_DIR = $(call dirname, $(call dirname, ${JAVAH}))
+else
+	JAVAH = $(realpath ${JAVA_HOME}/bin/javah)
+	JAVAC = $(realpath ${JAVA_HOME}/bin/javac)
+	JAR = $(realpath ${JAVA_HOME}/bin/jar)
+	JAVA_ROOT_DIR = ${JAVA_HOME}
+endif
+
+JAVA_SRC_ROOT = .
 JAVA_OUTPUT_DIR = ./build
 CLASSPATH = ${JAVA_OUTPUT_DIR}:${JAVA_SRC_ROOT}:
-#JAVA_SRC_ROOT = /home/sgalland/Documents/workspace/3dxware
-JAVA_SRC_ROOT = .
-JAVAH = $(realpath /etc/alternatives/javah)
-JAVAC = $(realpath /etc/alternatives/javac)
-JAR = $(realpath /etc/alternatives/jar)
-JAVA_ROOT_DIR = $(call dirname, $(call dirname, ${JAVAH}))
-JNI_INCLUDE_PATHS = $(shell find ${JAVA_ROOT_DIR}/include -type d -printf '%p:')
+PACKAGABLE_FILES = ../../../VERSION ../../../AUTHORS ../../../COPYING ../../../README
 S_JAVA_SRC_FILES = $(shell cd "${JAVA_SRC_ROOT}"; find . -name "*.java")
 JAVA_SRC_FILES = $(shell find "${JAVA_SRC_ROOT}" -name "*.java")
 S_JAVA_RESOURCE_FILES = $(shell cd "${JAVA_SRC_ROOT}"; find . -name "*.properties" -o -name "*.png" -o -name "*.jpg")
 JAVA_RESOURCE_FILES = $(shell find "${JAVA_SRC_ROOT}" -name "*.properties" -o -name "*.png" -o -name "*.jpg")
-PACKAGABLE_FILES = ../VERSION ../AUTHORS ../COPYING ../README
+JNI_INCLUDE_PATHS = $(shell find ${JAVA_ROOT_DIR}/include -type d -printf '%p:')
 
-DXWARE_INCLUDE_PATH = ../../cpp/include
-DXWARE_LIB_PATH = ../../cpp/src
+ifeq ("${ARCH}", "64")
+	JAVA_ARCH:=amd64
+else
+	JAVA_ARCH:=i386
+endif
+
+DXWARE_NATIVE_PATH = ../../cpp
+DXWARE_INCLUDE_PATH = ${DXWARE_NATIVE_PATH}/include
+DXWARE_LIB_PATH = ${DXWARE_NATIVE_PATH}/src
 
 OBJS =  JNIDriver.o JNIXlibBinder.o
 
-LIBS := -lX11 -lm -l3dxware -L${DXWARE_LIB_PATH} -L. -ljawt -L${JAVA_ROOT_DIR}/jre/lib/i386
-FLAGS := -I${DXWARE_INCLUDE_PATH} $(patsubst %,-I%,$(subst :, ,$(JNI_INCLUDE_PATHS))) "-DMAGELLAN_VERSION=${VERSION}" -DX11 -D${PLATFORM} -Wall -Werror
+LIBS := -L${JAVA_ROOT_DIR}/jre/lib/${JAVA_ARCH} -L${DXWARE_LIB_PATH} -L. -lX11 -lm -l3dxware -ljawt
+FLAGS := -I${DXWARE_INCLUDE_PATH} $(patsubst %,-I%,$(subst :, ,$(JNI_INCLUDE_PATHS))) "-DMAGELLAN_VERSION=${VERSION}" -DX11 -D${PLATFORM} -Wall -Werror -ansi -pedantic -fPIC
 
 ifeq ("${DEBUG}","1")
-override FLAGS += -DDEBUG
+	override FLAGS += -DDEBUG
 endif
 
 override CFLAGS += ${FLAGS}
@@ -79,10 +94,11 @@ j3dxdbg.sh:
 	cd "${JAVA_OUTPUT_DIR}"; ${JAR} cvf ../$@ .
 
 lib3dxware-jni.so: ${OBJS}
-	${CXX} ${CXXFLAGS} ${LIBS} -shared -o $@ $^
+	${CXX} ${CXXFLAGS} -shared -o $@ $^ ${LIBS}
 
 JNIDriver.h: ${JAVA_SRC_ROOT}/org/arakhne/dxware/Driver.java
 	@${JAVAH} -classpath "${CLASSPATH}" -o ./JNIDriver.h org.arakhne.dxware.Driver
+	@${JAVAH} -stubs -classpath "${CLASSPATH}" -o ./JNIDriver.stubs org.arakhne.dxware.Driver
 
 JNIDriver.o: JNIDriver.cpp JNIDriver.h
 	${CXX} ${CXXFLAGS} -o $@ -c $<
@@ -118,4 +134,6 @@ info:
 	@echo "JNI include paths: ${JNI_INCLUDE_PATHS}"
 	@echo "Java source files: ${JAVA_SRC_FILES}"
 	@echo "Java resource files: ${JAVA_RESOURCE_FILES}"
+	@echo "Architecture: ${ARCH}"
+	@echo "Java Architecture: ${JAVA_ARCH}"
 

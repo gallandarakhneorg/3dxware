@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -20,6 +20,10 @@
 #  define __3DX_EXCEPTION_H__
 
 #  include <stdio.h>
+
+#  ifdef __cplusplus
+extern "C" {
+#  endif
 
 namespace dxware {
 
@@ -66,6 +70,10 @@ class DeviceException {
 };
 
 } /* namespace dxware */
+
+#  ifdef __cplusplus
+}
+#  endif
 
 #endif // __3DX_EXCEPTION_H__
 

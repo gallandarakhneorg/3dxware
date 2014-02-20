@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -18,6 +18,10 @@
  */
 
 #include <3dxware/3dxEvent.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 namespace dxware {
 
@@ -88,4 +92,9 @@ void DeviceEvent::setPeriod(unsigned long period)
 	eventPeriod = period;
 }
 
+} /* namespace dxware */
+
+#ifdef __cplusplus
 }
+#endif
+

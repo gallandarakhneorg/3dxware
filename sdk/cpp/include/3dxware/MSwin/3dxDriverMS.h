@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -27,6 +27,10 @@
 #    error a driver was already included.
 #  else
 #    define DXWARE_DRIVER dxware::MSWindowDriver
+#  endif
+
+#  ifdef __cplusplus
+extern "C" {
 #  endif
 
 //#import "progid:TDxInput.Device.1" no_namespace
@@ -118,6 +122,10 @@ class MSWindowDriver: public Driver {
 };
 
 } /* namespace dxware */
+
+#  ifdef __cplusplus
+}
+#  endif
 
 #endif // __3DX_DRIVER_MS_H__
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This file is part of ASMD.
  *
@@ -23,7 +23,11 @@
 #include <3dxware/Xwin/MagellanUnixDrv.h>
 #include <3dxware/debug.h>
 
-Atom MagellanMotionEvent;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+Atom MagellanMotionEvent;
 Atom MagellanButtonPressEvent;
 Atom MagellanReleaseEvent;
 Window MagellanWindow;
@@ -228,4 +232,8 @@ int MagellanRemoveMotionEvents(Display* display)
 
 	return true;
 }
+
+#ifdef __cplusplus
+}
+#endif
 

@@ -20,6 +20,10 @@
 #include <3dxware/3dxCmdLine.h>
 #include <3dxware/3dxException.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 namespace dxware {
 
 static unsigned int argCount = 0;
@@ -61,5 +65,9 @@ void saveCommandLine(unsigned int argc, char** argv)
 	argValues = argv;
 }
 
+} /* namespace dxware */
+
+#ifdef __cplusplus
 }
+#endif
 

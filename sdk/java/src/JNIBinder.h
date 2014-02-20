@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Stéphane GALLAND <galland@arakhne.org>
+ * Copyright (c) 2008-2014 Stéphane GALLAND <galland@arakhne.org>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,7 +31,7 @@ typedef enum
 {
 	PEER_UNKNOW=0,
 	PEER_FRAME=1,
-	PEER_DIALOG=2,
+	PEER_DIALOG=2
 } PeerComponentType;
 
 /** Bind the given driver with the GUI resource specified by
@@ -39,7 +39,7 @@ typedef enum
  */
 void bind(JNIEnv* env, jobject jcomponent, dxware::Driver* driver, const char* name, const char* title, const char* typeName, PeerComponentType type);
 
-};
+}
 
 #endif // __JNI_BINDER_H__
 
