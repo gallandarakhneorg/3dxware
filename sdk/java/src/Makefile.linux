@@ -107,7 +107,7 @@ JNIXlibBinder.o: JNIXlibBinder.cpp JNIBinder.h
 	${CXX} ${CXXFLAGS} -o $@ -c $<
 
 clean:
-	${RM} *.o *~ *.bak *.log *.so *.jar
+	${RM} *.o *~ *.bak *.log *.so *.jar *.stubs
 	${RM} -r "${JAVA_OUTPUT_DIR}"
 	${RM} JNIDriver.h j3dxtest.sh j3dxdbg.sh 3dxdbg.sh
 	${RM} `find -name "*.class"`
