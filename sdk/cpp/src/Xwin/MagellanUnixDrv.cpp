@@ -199,7 +199,8 @@ int MagellanMultiplicationMatrix(double matrixA[4][4], double matrixB[4][4], dou
 	matrixR[0][3] = matrixR[1][3] = matrixR[2][3] = matrixR[3][0] = matrixR[3][1] = matrixR[3][2] = 0.0;
 	matrixR[3][3] = 1.0;
 
-	memcpy( matrixA, matrixR, sizeof(matrixA) );
+	const int memsize = sizeof(matrixA); // [#2] move sizeof outside the call for avoiding warning.
+	memcpy( matrixA, matrixR, memsize );
 
 	return TRUE;
 }
