@@ -43,8 +43,8 @@ clean:
 install:
 	install -d "${PREFIX}/include/3dxware/Xwin"
 	install "${INCLUDE_DIR}/xdrvlib.h" "${PREFIX}/include"
-	install "${INCLUDE_DIR}/3dxware/*.h" "${PREFIX}/include/3dxware"
-	install "${INCLUDE_DIR}/3dxware/Xwin/*.h" "${PREFIX}/include/3dxware/XWin"	
+	install "${INCLUDE_DIR}/3dxware/"*.h "${PREFIX}/include/3dxware"
+	install "${INCLUDE_DIR}/3dxware/Xwin/"*.h "${PREFIX}/include/3dxware/Xwin"
 	install -d "${PREFIX}/lib"
 	install lib3dxware.so "${PREFIX}/lib/lib3dxware.so.${VERSION}"
 	ln -fs "./lib3dxware.so.${VERSION}" "${PREFIX}/lib/lib3dxware.so"
